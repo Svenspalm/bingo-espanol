@@ -1,0 +1,10 @@
+services:
+  bingo:
+    image: nginx:alpine
+    container_name: bingo-espanol
+    restart: unless-stopped
+    # Bound to localhost only; Tailscale Serve exposes it to the tailnet.
+    ports:
+      - "127.0.0.1:8088:80"
+    volumes:
+      - .:/usr/share/nginx/html:ro

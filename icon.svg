@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="round"><rect x="8" y="8" width="496" height="496" rx="96"/></clipPath>
+  </defs>
+  <rect x="8" y="8" width="496" height="496" rx="96" fill="#fffdf7" stroke="#141414" stroke-width="16"/>
+  <g clip-path="url(#round)">
+    <g transform="translate(256,256)">
+      <g opacity="0.55">
+        <!-- rainbow sunburst rays -->
+        <polygon id="ray" points="0,0 -18,-260 18,-260"/>
+        <use href="#ray" fill="#ff2d87" transform="rotate(0)"/>
+        <use href="#ray" fill="#ff2d87" transform="rotate(25)"/>
+        <use href="#ray" fill="#ff8a00" transform="rotate(50)"/>
+        <use href="#ray" fill="#ff8a00" transform="rotate(75)"/>
+        <use href="#ray" fill="#ffd400" transform="rotate(100)"/>
+        <use href="#ray" fill="#ffd400" transform="rotate(125)"/>
+        <use href="#ray" fill="#1dd45a" transform="rotate(150)"/>
+        <use href="#ray" fill="#1dd45a" transform="rotate(175)"/>
+        <use href="#ray" fill="#00c2d1" transform="rotate(200)"/>
+        <use href="#ray" fill="#00c2d1" transform="rotate(225)"/>
+        <use href="#ray" fill="#2979ff" transform="rotate(250)"/>
+        <use href="#ray" fill="#2979ff" transform="rotate(275)"/>
+        <use href="#ray" fill="#b14aff" transform="rotate(300)"/>
+        <use href="#ray" fill="#b14aff" transform="rotate(325)"/>
+        <use href="#ray" fill="#ff2d87" transform="rotate(350)"/>
+      </g>
+    </g>
+  </g>
+  <!-- mini bingo card -->
+  <g transform="translate(256,266)">
+    <rect x="-170" y="-170" width="340" height="340" rx="36" fill="#fffdf7" stroke="#141414" stroke-width="14"/>
+    <g font-family="sans-serif">
+      <rect x="-156" y="-156" width="92" height="92" rx="18" fill="#ffd1e8" stroke="#141414" stroke-width="9" transform="rotate(-2 -110 -110)"/>
+      <rect x="-46" y="-156" width="92" height="92" rx="18" fill="#ffe9a8" stroke="#141414" stroke-width="9" transform="rotate(2 0 -110)"/>
+      <rect x="64" y="-156" width="92" height="92" rx="18" fill="#b9f3cd" stroke="#141414" stroke-width="9" transform="rotate(-2 110 -110)"/>
+      <rect x="-156" y="-46" width="92" height="92" rx="18" fill="#b7e3ff" stroke="#141414" stroke-width="9" transform="rotate(2 -110 0)"/>
+      <rect x="64" y="-46" width="92" height="92" rx="18" fill="#ddc3ff" stroke="#141414" stroke-width="9" transform="rotate(2 110 0)"/>
+      <rect x="-156" y="64" width="92" height="92" rx="18" fill="#b9f3cd" stroke="#141414" stroke-width="9" transform="rotate(2 -110 110)"/>
+      <rect x="-46" y="64" width="92" height="92" rx="18" fill="#b7e3ff" stroke="#141414" stroke-width="9" transform="rotate(-2 0 110)"/>
+      <rect x="64" y="64" width="92" height="92" rx="18" fill="#ffd1e8" stroke="#141414" stroke-width="9" transform="rotate(2 110 110)"/>
+      <!-- center cell, marked -->
+      <g transform="rotate(-1 0 0)">
+        <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#ff2d87" stroke="#141414" stroke-width="9"/>
+        <path d="M-24,-24 L24,24 M24,-24 L-24,24" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+      </g>
+    </g>
+  </g>
+</svg>

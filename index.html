@@ -1,0 +1,678 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Bingo Español</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#ff2d87">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bingo Español">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Patrick+Hand&family=Schibsted+Grotesk:wght@400;600&display=swap">
+<style>
+/* Layout: one 5x5 card, four faces behind tabs (words, drawings, play, list). Graph-paper ground, handwritten board type. */
+:root{
+  --paper:#fffdf7; --grid:#ffe3f2; --cell:#ffffff; --line:#1c1c1c; --ink:#141414; --muted:#4a4a4a;
+  --blue:#ff2d87; --blue-ink:#ffffff; --red:#ff3b30; --sketch:#fffdf2;
+  --pop-pink:#ff2d87; --pop-orange:#ff8a00; --pop-yellow:#ffd400; --pop-green:#1dd45a;
+  --pop-cyan:#00c2d1; --pop-blue:#2979ff; --pop-purple:#b14aff;
+  --f-display:'Caveat Brush','Segoe Print',cursive;
+  --f-hand:'Patrick Hand','Segoe Print',cursive;
+  --f-ui:'Schibsted Grotesk',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b0b14; --grid:#1a0e22; --cell:#15121f; --line:#2a2a2a; --ink:#f5f0ff; --muted:#b9aed6;
+    --blue:#ff5fb0; --blue-ink:#160019; --red:#ff6b57; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b0b14; --grid:#1a0e22; --cell:#15121f; --line:#2a2a2a; --ink:#f5f0ff; --muted:#b9aed6;
+  --blue:#ff5fb0; --blue-ink:#160019; --red:#ff6b57; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper); color:var(--ink); font-family:var(--f-ui); font-size:15px; line-height:1.45;
+  background-image:
+    radial-gradient(ellipse 65% 42% at 12% -4%, rgba(255,45,135,.30), transparent 62%),
+    radial-gradient(ellipse 55% 46% at 94% 6%, rgba(0,194,209,.26), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 108%, rgba(255,212,0,.22), transparent 62%),
+    radial-gradient(ellipse 50% 42% at -4% 96%, rgba(29,212,90,.22), transparent 60%),
+    radial-gradient(ellipse 46% 38% at 104% 100%, rgba(177,74,255,.20), transparent 60%);
+  background-repeat:no-repeat; padding-inline:16px; padding-block:20px 48px; min-height:100%;
+}
+.wrap{max-width:34rem; margin-inline:auto; display:flex; flex-direction:column; gap:16px}
+header{position:relative; overflow:visible}
+.sunburst{
+  position:absolute; top:50%; left:7.5rem; width:230px; height:230px; transform:translate(-50%,-50%); z-index:-1;
+  border-radius:50%; opacity:.4; pointer-events:none;
+  background:repeating-conic-gradient(var(--pop-pink) 0deg 4deg, transparent 4deg 13deg,
+    var(--pop-orange) 13deg 17deg, transparent 17deg 26deg,
+    var(--pop-yellow) 26deg 30deg, transparent 30deg 39deg,
+    var(--pop-green) 39deg 43deg, transparent 43deg 52deg,
+    var(--pop-cyan) 52deg 56deg, transparent 56deg 65deg,
+    var(--pop-blue) 65deg 69deg, transparent 69deg 78deg,
+    var(--pop-purple) 78deg 82deg, transparent 82deg 90deg);
+  -webkit-mask-image:radial-gradient(circle, #000 45%, transparent 78%);
+  mask-image:radial-gradient(circle, #000 45%, transparent 78%);
+}
+h1{
+  font-family:var(--f-display); font-weight:400; font-size:2.6rem; line-height:1; margin:0; letter-spacing:.01em; text-wrap:balance;
+  color:var(--ink); position:relative;
+  background-image:linear-gradient(100deg,var(--pop-pink),var(--pop-orange),var(--pop-yellow),var(--pop-green),var(--pop-cyan),var(--pop-blue),var(--pop-purple));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1.5px var(--ink);
+}
+.rule{
+  height:5px; width:5.5rem; border-radius:3px;
+  background:linear-gradient(90deg,var(--pop-pink),var(--pop-orange),var(--pop-yellow),var(--pop-green),var(--pop-cyan),var(--pop-blue),var(--pop-purple));
+}
+header{display:flex; flex-direction:column; gap:10px}
+.tabs{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px}
+.tabs button{
+  font:700 .9rem var(--f-ui); padding:9px 4px; border:2.5px solid var(--ink); background:var(--cell); color:var(--ink);
+  border-radius:16px; cursor:pointer; box-shadow:2px 2px 0 var(--ink);
+}
+.tabs button[aria-selected="true"]{background:var(--ink); color:var(--paper)}
+.tabs button:nth-child(1)[aria-selected="true"]{background:var(--pop-pink); color:#fff}
+.tabs button:nth-child(2)[aria-selected="true"]{background:var(--pop-cyan); color:#06232b}
+.tabs button:nth-child(3)[aria-selected="true"]{background:var(--pop-yellow); color:#2b2300}
+.tabs button:nth-child(4)[aria-selected="true"]{background:var(--pop-green); color:#06230f}
+button:focus-visible,textarea:focus-visible,canvas:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+.note{margin:0; color:var(--muted); font-size:.9rem; min-width:0}
+.board{
+  display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; width:100%;
+}
+.cell{
+  position:relative; aspect-ratio:1/1; min-width:0; background:var(--cell); border:2.5px solid var(--ink); margin:0; padding:2px;
+  border-radius:13px; display:flex; align-items:center; justify-content:center; text-align:center;
+  font-family:var(--f-hand); font-size:clamp(.78rem,3.7vw,1.3rem); line-height:1.05; color:var(--ink);
+  overflow-wrap:anywhere; hyphens:none; overflow:hidden;
+}
+.board .cell:nth-child(10n+1),.board .cell:nth-child(10n+4),.board .cell:nth-child(10n+7),.board .cell:nth-child(10n+9){transform:rotate(-1deg)}
+.board .cell:nth-child(10n+2),.board .cell:nth-child(10n+5),.board .cell:nth-child(10n+8),.board .cell:nth-child(10n+10){transform:rotate(1deg)}
+button.cell{cursor:pointer; color:inherit}
+button.cell:focus-visible{outline:3px solid var(--blue); outline-offset:-3px; z-index:2}
+.cell.sketch{background:var(--sketch); padding:0}
+.cell img{display:block; width:100%; height:100%; object-fit:cover}
+.cell .plus{width:34%; height:34%; position:relative; opacity:.35}
+.cell .plus::before,.cell .plus::after{content:""; position:absolute; background:var(--ink); border-radius:1px}
+.cell .plus::before{left:0; right:0; top:calc(50% - 1.5px); height:3px}
+.cell .plus::after{top:0; bottom:0; left:calc(50% - 1.5px); width:3px}
+.cell.win{box-shadow:0 0 0 4px var(--pop-pink); z-index:1; transform:scale(1.04) rotate(0deg)!important}
+#gw .cell:nth-child(5n+1){background:#ffd1e8; color:#141414}
+#gw .cell:nth-child(5n+2){background:#ffe9a8; color:#141414}
+#gw .cell:nth-child(5n+3){background:#b9f3cd; color:#141414}
+#gw .cell:nth-child(5n+4){background:#b7e3ff; color:#141414}
+#gw .cell:nth-child(5n+5){background:#ddc3ff; color:#141414}
+.stamp{position:absolute; inset:8%; width:84%; height:84%; pointer-events:none}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.btn{
+  font:700 .95rem var(--f-ui); padding:10px 16px; border:2.5px solid var(--ink); background:var(--cell); color:var(--ink);
+  border-radius:16px; cursor:pointer; box-shadow:2px 2px 0 var(--ink);
+}
+.btn:active{box-shadow:1px 1px 0 var(--ink); transform:translate(2px,2px)}
+.btn.primary{background:var(--blue); border-color:var(--ink); color:var(--blue-ink); box-shadow:3px 3px 0 var(--ink)}
+.btn[disabled]{opacity:.45; cursor:default; box-shadow:none}
+.caller{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--cell); border:2.5px solid var(--ink); padding:10px 12px;
+  border-radius:16px;
+}
+#cur{font-family:var(--f-display); font-size:2.2rem; line-height:1.05; flex:1 1 8rem; min-width:0; overflow-wrap:anywhere}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; list-style:none}
+.chips li{font-family:var(--f-hand); font-size:1rem; border:1.5px solid var(--line); background:var(--cell); padding:1px 8px; border-radius:99px}
+.bingo{
+  font-family:var(--f-display); font-size:2.4rem; text-align:center; color:#fff; border:4px solid var(--ink);
+  padding:4px 10px; background:linear-gradient(90deg,var(--pop-pink),var(--pop-orange),var(--pop-yellow));
+  transform:rotate(-1.5deg); text-shadow:2px 2px 0 var(--ink); border-radius:18px;
+}
+textarea{
+  width:100%; min-height:20rem; font:1rem/1.5 var(--f-hand); padding:10px 12px; background:var(--cell); color:var(--ink);
+  border:2.5px solid var(--ink); border-radius:14px; resize:vertical;
+}
+.count{font-weight:600}
+.count.bad{color:var(--red)}
+/* drawing editor */
+.overlay{position:fixed; inset:0; background:rgba(8,12,20,.62); display:flex; align-items:center; justify-content:center; padding:16px; z-index:20}
+.editor{
+  width:100%; max-width:26rem; max-height:100%; overflow:auto; background:var(--paper); color:var(--ink); border:4px solid var(--ink);
+  padding:14px; display:flex; flex-direction:column; gap:10px; border-radius:22px;
+}
+.editor h2{font-family:var(--f-display); font-weight:400; font-size:1.8rem; margin:0; line-height:1.1}
+#pad{width:100%; aspect-ratio:1/1; max-height:60vh; background:var(--sketch); border:3px solid var(--ink); touch-action:none; cursor:crosshair; display:block; border-radius:14px}
+.tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.sw{width:32px; height:32px; border-radius:50%; border:2px solid var(--paper); box-shadow:0 0 0 2px var(--line); cursor:pointer; padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.sz{width:36px; height:32px; border:2px solid var(--line); background:var(--cell); color:var(--ink); border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0}
+.sz[aria-pressed="true"]{border-color:var(--ink)}
+.sz i{display:block; background:var(--ink); border-radius:50%}
+/* login / landing / hints */
+.login-card,.landing-card{
+  display:flex; flex-direction:column; gap:14px; background:var(--cell); border:3px solid var(--ink);
+  padding:20px; box-shadow:5px 5px 0 var(--ink); border-radius:22px;
+}
+.login-card{transform:rotate(-0.4deg)}
+.landing-card{transform:rotate(0.4deg)}
+.user-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+.user-grid button{
+  font:700 1rem var(--f-ui); padding:18px 8px; border:2.5px solid var(--ink); border-radius:18px; cursor:pointer;
+  background:var(--cell); color:var(--ink); box-shadow:3px 3px 0 var(--ink);
+}
+.user-grid button:nth-child(1){background:#ffd1e8; transform:rotate(-1deg)}
+.user-grid button:nth-child(2){background:#bdf0f7; transform:rotate(1deg)}
+.user-grid button:nth-child(3){background:#ffe9a8; transform:rotate(1deg)}
+.user-grid button:nth-child(4){background:#b9f3cd; transform:rotate(-1deg)}
+.user-grid button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.pass-row{display:flex; flex-wrap:wrap; gap:8px}
+#loginPass{
+  font:1rem var(--f-ui); padding:10px 14px; border:2.5px solid var(--ink); border-radius:16px; flex:1 1 9rem;
+  background:var(--cell); color:var(--ink);
+}
+.landing-list{margin:0; padding-left:1.2em; display:flex; flex-direction:column; gap:8px}
+.next-btn{align-self:center; font-size:1.1rem; padding:14px 30px; animation:popbounce 1.6s ease-in-out infinite}
+@keyframes popbounce{0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.05)}}
+.userbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:space-between}
+.userbar .btn{padding:7px 10px; font-size:.85rem; box-shadow:2px 2px 0 var(--ink)}
+.spotlight{position:fixed; inset:0; z-index:40}
+.spot{position:fixed; border-radius:10px; box-shadow:0 0 0 9999px rgba(8,8,14,.62), 0 0 0 4px var(--pop-pink); transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease; pointer-events:none}
+.hint-bubble{
+  position:fixed; max-width:17rem; background:var(--cell); color:var(--ink); border:3px solid var(--ink); border-radius:6px;
+  padding:12px; box-shadow:4px 4px 0 var(--ink); display:flex; flex-direction:column; gap:10px; transition:top .25s ease,left .25s ease;
+}
+.hint-bubble p{margin:0; font-family:var(--f-hand); font-size:1.05rem; line-height:1.3}
+[hidden]{display:none!important}
+</style>
+
+</head><body>
+<div class="wrap" id="view-login">
+  <header>
+    <div class="sunburst" aria-hidden="true"></div>
+    <h1>Bingo Español</h1>
+    <div class="rule"></div>
+  </header>
+  <div class="login-card">
+    <p class="note" id="loginSub">Who's playing?</p>
+    <div class="user-grid" id="userGrid"></div>
+    <div id="passStep" hidden>
+      <p class="note">Hi <strong id="loginName"></strong> — enter the password.</p>
+      <div class="pass-row">
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="Password">
+        <button type="button" class="btn primary" id="loginGo">Log in</button>
+        <button type="button" class="btn" id="loginBack">Back</button>
+      </div>
+      <p class="note" id="loginErr" style="color:var(--red); min-height:1.2em" aria-live="polite"></p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-landing" hidden>
+  <header>
+    <div class="sunburst" aria-hidden="true"></div>
+    <h1>Bingo Español</h1>
+    <div class="rule"></div>
+  </header>
+  <div class="landing-card">
+    <p class="note" id="landingWelcome" style="color:var(--ink); font-weight:600"></p>
+    <ul class="landing-list">
+      <li><strong>Palabras</strong> — your board of 25 random Spanish terms.</li>
+      <li><strong>Dibujos</strong> — draw a quick picture for each word. Mouse, finger, or a stylus like Apple Pencil all work.</li>
+      <li><strong>Jugar</strong> — press Llamar to call a random word, then tap its picture. Five in a row wins!</li>
+      <li><strong>Lista</strong> — edit the vocab pool any time; drawings stay matched to their word.</li>
+    </ul>
+    <button type="button" class="btn primary next-btn" id="landingNext">Next →</button>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div class="sunburst" aria-hidden="true"></div>
+    <h1>Bingo Español</h1>
+    <div class="rule"></div>
+    <div class="userbar">
+      <span class="note" id="whoami"></span>
+      <div class="row" style="gap:6px">
+        <button type="button" class="btn" id="helpBtn">? Help</button>
+        <button type="button" class="btn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Board faces">
+      <button type="button" role="tab" id="t-words" aria-selected="true" aria-controls="v-words">Palabras</button>
+      <button type="button" role="tab" id="t-pics" aria-selected="false" aria-controls="v-pics">Dibujos</button>
+      <button type="button" role="tab" id="t-play" aria-selected="false" aria-controls="v-play">Jugar</button>
+      <button type="button" role="tab" id="t-list" aria-selected="false" aria-controls="v-list">Lista</button>
+    </div>
+  </header>
+
+  <section id="v-words" role="tabpanel" aria-labelledby="t-words">
+    <p class="note" style="margin-bottom:10px">Side one: 25 Spanish terms, no English, no free space. Copy it onto paper, or keep it as your answer key.</p>
+    <div class="board" id="gw"></div>
+  </section>
+
+  <section id="v-pics" role="tabpanel" aria-labelledby="t-pics" hidden>
+    <p class="note" style="margin-bottom:10px">Side two: pictures only. Tap a square to draw. It only has to make sense to you. <span id="prog" class="count"></span></p>
+    <div class="board" id="gp"></div>
+  </section>
+
+  <section id="v-play" role="tabpanel" aria-labelledby="t-play" hidden style="flex-direction:column; gap:12px">
+    <div class="caller">
+      <div id="cur" aria-live="polite">·</div>
+      <button type="button" class="btn primary" id="call">Llamar</button>
+    </div>
+    <ul class="chips" id="chips" aria-label="Called"></ul>
+    <p class="note">Hear the word, find the picture in your head, tap that square to stamp it. Five in a row wins: across, down or diagonal.</p>
+    <div class="board" id="gg"></div>
+    <div class="bingo" id="bingo" hidden>¡BINGO!</div>
+    <div class="row"><button type="button" class="btn" id="reset">New game</button></div>
+  </section>
+
+  <section id="v-list" role="tabpanel" aria-labelledby="t-list" hidden style="flex-direction:column; gap:10px">
+    <p class="note">One Spanish term per line, 25 or more. Each board uses 25 of them, picked at random. Drawings stay with their term, so a picture you made once shows up on any later board that has that term.</p>
+    <label for="terms" class="note" style="color:var(--ink); font-weight:600">Your vocab list <span id="tcount" class="count"></span></label>
+    <textarea id="terms" spellcheck="false" autocapitalize="off"></textarea>
+    <div class="row">
+      <button type="button" class="btn primary" id="build">Build board</button>
+      <button type="button" class="btn" id="shuffle">Draw new board</button>
+      <button type="button" class="btn" id="sample">Class vocab</button>
+    </div>
+    <p class="note" id="msg" aria-live="polite"></p>
+  </section>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <h2 id="edTitle"></h2>
+    <canvas id="pad" width="360" height="360" aria-label="Drawing pad"></canvas>
+    <div class="tools" id="tools"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button type="button" class="btn" id="edClear">Clear</button>
+      <button type="button" class="btn" id="edCancel">Cancel</button>
+      <button type="button" class="btn primary" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="spotlight" id="spotlight" hidden>
+  <div class="spot" id="spot"></div>
+  <div class="hint-bubble" id="hintBubble">
+    <p id="hintText"></p>
+    <div class="row" style="justify-content:flex-end; gap:6px">
+      <button type="button" class="btn" id="hintSkip">Skip</button>
+      <button type="button" class="btn primary" id="hintNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var N = 25;
+  var KEY = null;
+  var SAMPLE = ['pescar','cazar','acampar','esquiar','hacer snowboard','caminar en las montañas',
+    'montar en bicicleta','montar en caballo','montar en motocicleta','montar en motonieve','andar en patineta',
+    'nadar','correr','escalar','pasear','bailar','cantar','dibujar','leer un libro','escuchar música','escribir',
+    'hacer la tarea','estudiar','ver la televisión','ver Netflix','ver películas','ver partidos','jugar deportes',
+    'el fútbol','el fútbol americano','el básquetbol','el béisbol','el volibol','el tenis','el golf','el joqui',
+    'los videojuegos','practicar','tocar','el piano','el saxofón','el clarinete','el trombón','el chelo','el violín',
+    'la flauta','la guitarra','la trompeta','la batería','pasar tiempo con amigos','descansar','relajar','dormir',
+    'comer','cocinar','hacer gimnasia','hacer ejercicio','animar','manejar'];
+  function pick(list){
+    var a = list.slice();
+    for (var i = a.length-1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a.slice(0, N);
+  }
+  var S = {pool:SAMPLE.slice(), order:pick(SAMPLE), drawings:{}, marks:{}, called:[]};
+  function loadState(){
+    S = {pool:SAMPLE.slice(), order:pick(SAMPLE), drawings:{}, marks:{}, called:[]};
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && Array.isArray(o.order) && o.order.length === N && Array.isArray(o.pool) && o.pool.length >= N) {
+          S.pool = o.pool; S.order = o.order; S.drawings = o.drawings || {}; S.marks = o.marks || {}; S.called = o.called || [];
+        }
+      }
+    } catch (e) {}
+  }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function $(s){ return document.querySelector(s); }
+
+  /* tabs */
+  var tabs = ['words','pics','play','list'];
+  function show(name){
+    tabs.forEach(function(t){
+      var on = t === name;
+      $('#t-'+t).setAttribute('aria-selected', on ? 'true' : 'false');
+      var v = $('#v-'+t);
+      v.hidden = !on;
+      if (t === 'play' || t === 'list') v.style.display = on ? 'flex' : '';
+    });
+    if (name === 'pics') renderPics();
+    if (name === 'play') renderPlay();
+  }
+  tabs.forEach(function(t){ $('#t-'+t).addEventListener('click', function(){ show(t); }); });
+
+  /* words */
+  function renderWords(){
+    var g = $('#gw'); g.textContent = '';
+    S.order.forEach(function(t){
+      var d = document.createElement('div'); d.className = 'cell'; d.textContent = t; g.appendChild(d);
+    });
+  }
+
+  /* pictures */
+  function picCell(term, tag){
+    var c = document.createElement(tag); c.className = 'cell sketch';
+    if (tag === 'button'){ c.type = 'button'; c.setAttribute('aria-label', term); }
+    if (S.drawings[term]){
+      var im = document.createElement('img'); im.src = S.drawings[term]; im.alt = ''; c.appendChild(im);
+    } else {
+      var p = document.createElement('span'); p.className = 'plus'; c.appendChild(p);
+      c.style.background = 'var(--cell)';
+    }
+    return c;
+  }
+  function renderPics(){
+    var g = $('#gp'); g.textContent = '';
+    var done = 0;
+    S.order.forEach(function(t){
+      if (S.drawings[t]) done++;
+      var c = picCell(t, 'button');
+      c.addEventListener('click', function(){ openEditor(t); });
+      g.appendChild(c);
+    });
+    $('#prog').textContent = done + ' of ' + N + ' drawn';
+  }
+
+  /* play */
+  var LINES = [];
+  for (var r = 0; r < 5; r++){ LINES.push([0,1,2,3,4].map(function(c){ return r*5+c; })); }
+  for (var c2 = 0; c2 < 5; c2++){ LINES.push([0,1,2,3,4].map(function(r2){ return r2*5+c2; })); }
+  LINES.push([0,6,12,18,24]); LINES.push([4,8,12,16,20]);
+  function winners(){
+    var w = {};
+    LINES.forEach(function(L){
+      if (L.every(function(i){ return S.marks[S.order[i]]; })) L.forEach(function(i){ w[i] = true; });
+    });
+    return w;
+  }
+  function renderCaller(){
+    var last = S.called[S.called.length-1];
+    $('#cur').textContent = last || '·';
+    var ul = $('#chips'); ul.textContent = '';
+    S.called.slice().reverse().forEach(function(t){
+      var li = document.createElement('li'); li.textContent = t; ul.appendChild(li);
+    });
+    $('#call').disabled = S.called.length >= N;
+  }
+  function renderPlay(){
+    var g = $('#gg'); g.textContent = '';
+    var w = winners();
+    S.order.forEach(function(t, i){
+      var c = picCell(t, 'button');
+      c.setAttribute('aria-pressed', S.marks[t] ? 'true' : 'false');
+      if (w[i]) c.classList.add('win');
+      if (S.marks[t]){
+        var ns = 'http://www.w3.org/2000/svg';
+        var s = document.createElementNS(ns, 'svg'); s.setAttribute('viewBox','0 0 40 40'); s.setAttribute('class','stamp');
+        var p = document.createElementNS(ns, 'path');
+        p.setAttribute('d','M6 6 L34 34 M34 6 L6 34'); p.setAttribute('stroke','var(--red)'); p.setAttribute('stroke-width','5');
+        p.setAttribute('stroke-linecap','round'); p.setAttribute('fill','none'); p.setAttribute('opacity','.9');
+        s.appendChild(p); c.appendChild(s);
+      }
+      c.addEventListener('click', function(){
+        S.marks[t] = !S.marks[t]; save(); renderPlay();
+      });
+      g.appendChild(c);
+    });
+    $('#bingo').hidden = Object.keys(w).length === 0;
+    renderCaller();
+  }
+  $('#call').addEventListener('click', function(){
+    var rem = S.order.filter(function(t){ return S.called.indexOf(t) === -1; });
+    if (!rem.length) return;
+    S.called.push(rem[Math.floor(Math.random()*rem.length)]); save(); renderCaller();
+  });
+  $('#reset').addEventListener('click', function(){ S.marks = {}; S.called = []; save(); renderPlay(); });
+
+  /* list */
+  function parse(){
+    var seen = {}, out = [];
+    $('#terms').value.split('\n').forEach(function(l){
+      var t = l.trim(); if (!t) return;
+      var k = t.toLowerCase(); if (seen[k]) return; seen[k] = true; out.push(t);
+    });
+    return out;
+  }
+  function updateCount(){
+    var n = parse().length, el = $('#tcount');
+    el.textContent = n + ' terms'; el.className = 'count' + (n >= N ? '' : ' bad');
+    return n;
+  }
+  $('#terms').addEventListener('input', function(){ updateCount(); $('#msg').textContent = ''; });
+  $('#build').addEventListener('click', function(){
+    var n = updateCount(), list = parse();
+    if (n < N){
+      $('#msg').textContent = 'Add ' + (N-n) + ' more term' + (N-n === 1 ? '' : 's') + '. Duplicates are ignored.';
+      return;
+    }
+    S.pool = list; S.order = pick(list); S.marks = {}; S.called = []; save();
+    $('#msg').textContent = 'Board built from ' + n + ' terms.'; renderWords(); show('words');
+  });
+  $('#shuffle').addEventListener('click', function(){
+    S.order = pick(S.pool); S.marks = {}; S.called = []; save(); renderWords();
+    $('#msg').textContent = 'New board drawn. Pictures you already made carry over to any term you draw again.';
+  });
+  $('#sample').addEventListener('click', function(){ $('#terms').value = SAMPLE.join('\n'); updateCount(); $('#msg').textContent = 'Class vocab loaded. Press Build board to use it.'; });
+
+  /* drawing editor */
+  var pad = $('#pad'), ctx = pad.getContext('2d');
+  var PAPER = '#fffdf2';
+  var COLORS = ['#141414','#ff2d87','#2979ff','#1dd45a','#ffb000'];
+  var SIZES = [3, 8, 18];
+  var pen = {color:COLORS[0], size:SIZES[1], erase:false};
+  var editing = null, drawing = false, lx = 0, ly = 0;
+  (function buildTools(){
+    var t = $('#tools');
+    COLORS.forEach(function(col){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = col;
+      b.setAttribute('aria-label', 'Pen ' + col); b.dataset.color = col;
+      b.addEventListener('click', function(){ pen.color = col; pen.erase = false; sync(); });
+      t.appendChild(b);
+    });
+    SIZES.forEach(function(sz){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sz'; b.dataset.size = sz;
+      b.setAttribute('aria-label', 'Size ' + sz);
+      var i = document.createElement('i'); i.style.width = Math.max(4, sz*.7) + 'px'; i.style.height = Math.max(4, sz*.7) + 'px'; b.appendChild(i);
+      b.addEventListener('click', function(){ pen.size = sz; sync(); });
+      t.appendChild(b);
+    });
+    var e = document.createElement('button'); e.type = 'button'; e.className = 'btn'; e.id = 'eraser'; e.textContent = 'Eraser';
+    e.style.padding = '5px 10px';
+    e.addEventListener('click', function(){ pen.erase = !pen.erase; sync(); });
+    t.appendChild(e);
+  })();
+  function sync(){
+    document.querySelectorAll('.sw').forEach(function(b){ b.setAttribute('aria-pressed', (!pen.erase && b.dataset.color === pen.color) ? 'true' : 'false'); });
+    document.querySelectorAll('.sz').forEach(function(b){ b.setAttribute('aria-pressed', Number(b.dataset.size) === pen.size ? 'true' : 'false'); });
+    $('#eraser').className = 'btn' + (pen.erase ? ' primary' : '');
+  }
+  function blank(){ ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = PAPER; ctx.fillRect(0,0,pad.width,pad.height); }
+  function openEditor(term){
+    editing = term; $('#edTitle').textContent = term; blank();
+    if (S.drawings[term]){
+      var im = new Image(); im.onload = function(){ ctx.drawImage(im, 0, 0, pad.width, pad.height); }; im.src = S.drawings[term];
+    }
+    sync(); $('#overlay').hidden = false; $('#edSave').focus();
+  }
+  function closeEditor(){ $('#overlay').hidden = true; editing = null; drawing = false; }
+  function pos(e){
+    var r = pad.getBoundingClientRect();
+    return [(e.clientX - r.left) * pad.width / r.width, (e.clientY - r.top) * pad.height / r.height];
+  }
+  function stroke(x0, y0, x1, y1){
+    ctx.strokeStyle = pen.erase ? PAPER : pen.color; ctx.lineWidth = pen.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+  pad.addEventListener('pointerdown', function(e){
+    drawing = true; var p = pos(e); lx = p[0]; ly = p[1];
+    try { pad.setPointerCapture(e.pointerId); } catch (err) {}
+    stroke(lx, ly, lx + .01, ly + .01); e.preventDefault();
+  });
+  pad.addEventListener('pointermove', function(e){
+    if (!drawing) return; var p = pos(e); stroke(lx, ly, p[0], p[1]); lx = p[0]; ly = p[1]; e.preventDefault();
+  });
+  ['pointerup','pointercancel'].forEach(function(n){ pad.addEventListener(n, function(){ drawing = false; }); });
+  $('#edClear').addEventListener('click', blank);
+  $('#edCancel').addEventListener('click', closeEditor);
+  $('#edSave').addEventListener('click', function(){
+    if (editing){ S.drawings[editing] = pad.toDataURL('image/png'); save(); }
+    closeEditor(); renderPics();
+  });
+  $('#overlay').addEventListener('click', function(e){ if (e.target === this) closeEditor(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !$('#overlay').hidden) closeEditor(); });
+
+  /* boot */
+  function bootGame(){
+    $('#terms').value = S.pool.join('\n'); updateCount();
+    renderWords(); renderPics(); renderPlay();
+  }
+
+  /* auth */
+  var USERS = [
+    {id:'jen', name:'Jen Hensley', pass:'password'},
+    {id:'charlie', name:'Charlie Gallus', pass:'password'},
+    {id:'spencer', name:'Spencer Barnett', pass:'password'},
+    {id:'teacher', name:'Teacher', pass:'password'}
+  ];
+  var SESSION_KEY = 'bingo-espanol-session';
+  var CURRENT = null, pendingUser = null;
+
+  function byId(id){ for (var i=0;i<USERS.length;i++){ if (USERS[i].id === id) return USERS[i]; } return null; }
+
+  function buildUserGrid(){
+    var g = $('#userGrid'); g.textContent = '';
+    USERS.forEach(function(u){
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = u.name;
+      b.addEventListener('click', function(){ openPassStep(u); });
+      g.appendChild(b);
+    });
+  }
+  function openPassStep(u){
+    pendingUser = u;
+    $('#loginName').textContent = u.name;
+    $('#loginErr').textContent = '';
+    $('#loginPass').value = '';
+    $('#passStep').hidden = false;
+    $('#loginPass').focus();
+  }
+  $('#loginBack').addEventListener('click', function(){
+    pendingUser = null; $('#passStep').hidden = true;
+  });
+  function attemptLogin(){
+    if (!pendingUser) return;
+    if ($('#loginPass').value === pendingUser.pass){
+      localStorage.setItem(SESSION_KEY, pendingUser.id);
+      enterApp(pendingUser, true);
+    } else {
+      $('#loginErr').textContent = 'Incorrect password.';
+    }
+  }
+  $('#loginGo').addEventListener('click', attemptLogin);
+  $('#loginPass').addEventListener('keydown', function(e){ if (e.key === 'Enter') attemptLogin(); });
+
+  function enterApp(u, freshLogin){
+    CURRENT = u;
+    KEY = 'bingo-espanol-v2-' + u.id;
+    loadState();
+    $('#view-login').hidden = true;
+    if (freshLogin){
+      $('#landingWelcome').textContent = '¡Bienvenido, ' + u.name + '! Here’s how it works:';
+      $('#view-landing').hidden = false;
+    } else {
+      startApp();
+    }
+  }
+  $('#landingNext').addEventListener('click', function(){
+    $('#view-landing').hidden = true;
+    startApp();
+  });
+
+  function startApp(){
+    $('#whoami').textContent = CURRENT.name;
+    $('#app').hidden = false;
+    bootGame();
+    maybeShowHints();
+  }
+  $('#logoutBtn').addEventListener('click', function(){
+    localStorage.removeItem(SESSION_KEY);
+    CURRENT = null; KEY = null;
+    $('#app').hidden = true;
+    $('#passStep').hidden = true;
+    $('#loginPass').value = ''; $('#loginErr').textContent = '';
+    $('#view-login').hidden = false;
+  });
+
+  function initAuth(){
+    buildUserGrid();
+    var savedId = null;
+    try { savedId = localStorage.getItem(SESSION_KEY); } catch (e) {}
+    var u = savedId && byId(savedId);
+    if (u) enterApp(u, false);
+  }
+
+  /* cursor hints */
+  var HINTS = [
+    {tab:'words', sel:'.tabs', text:'Switch between Palabras, Dibujos, Jugar, and Lista with these tabs.'},
+    {tab:'words', sel:'#gw', text:'This is your board — 25 Spanish terms, picked at random from the list.'},
+    {tab:'pics', sel:'#gp', text:'Tap any square here to draw a picture for that word. Mouse, finger, or a stylus like Apple Pencil all work.'},
+    {tab:'play', sel:'.caller', text:'Press Llamar to call a random word, then tap its matching picture. Five in a row wins!'}
+  ];
+  var hintStep = -1;
+  function positionHint(sel){
+    var el = $(sel); if (!el) return;
+    var r = el.getBoundingClientRect();
+    var pad = 6;
+    var spot = $('#spot');
+    spot.style.top = (r.top - pad) + 'px'; spot.style.left = (r.left - pad) + 'px';
+    spot.style.width = (r.width + pad*2) + 'px'; spot.style.height = (r.height + pad*2) + 'px';
+    var bubble = $('#hintBubble');
+    var top = r.bottom + 14;
+    if (top + 140 > window.innerHeight) top = Math.max(10, r.top - 150);
+    var left = Math.min(Math.max(10, r.left), window.innerWidth - 280);
+    bubble.style.top = top + 'px'; bubble.style.left = left + 'px';
+  }
+  function showHintStep(i){
+    hintStep = i;
+    if (i >= HINTS.length){ finishHints(); return; }
+    var h = HINTS[i];
+    show(h.tab);
+    $('#hintText').textContent = h.text;
+    $('#hintNext').textContent = (i === HINTS.length - 1) ? 'Got it!' : 'Next';
+    $('#spotlight').hidden = false;
+    requestAnimationFrame(function(){ positionHint(h.sel); });
+  }
+  function finishHints(){
+    $('#spotlight').hidden = true;
+    hintStep = -1;
+    if (CURRENT){ try { localStorage.setItem('bingo-hints-seen-' + CURRENT.id, '1'); } catch (e) {} }
+  }
+  $('#hintNext').addEventListener('click', function(){ showHintStep(hintStep + 1); });
+  $('#hintSkip').addEventListener('click', finishHints);
+  window.addEventListener('resize', function(){
+    if (hintStep >= 0 && hintStep < HINTS.length) positionHint(HINTS[hintStep].sel);
+  });
+  function maybeShowHints(){
+    var seen = false;
+    try { seen = !!localStorage.getItem('bingo-hints-seen-' + CURRENT.id); } catch (e) {}
+    if (!seen) showHintStep(0);
+  }
+  $('#helpBtn').addEventListener('click', function(){ showHintStep(0); });
+
+  initAuth();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body></html>
