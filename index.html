@@ -106,6 +106,13 @@ button.cell:focus-visible{outline:3px solid var(--blue); outline-offset:-3px; z-
 .cell .plus::before{left:0; right:0; top:calc(50% - 1.5px); height:3px}
 .cell .plus::after{top:0; bottom:0; left:calc(50% - 1.5px); width:3px}
 .cell.win{box-shadow:0 0 0 4px var(--pop-pink); z-index:1; transform:scale(1.04) rotate(0deg)!important}
+.cell.wrong{animation:cellShake .4s ease-in-out; box-shadow:0 0 0 4px var(--red)!important}
+@keyframes cellShake{
+  10%,90%{transform:translateX(-1px)}
+  20%,80%{transform:translateX(3px)}
+  30%,50%,70%{transform:translateX(-6px)}
+  40%,60%{transform:translateX(6px)}
+}
 #gw .cell:nth-child(5n+1){background:#ffd1e8; color:#141414}
 #gw .cell:nth-child(5n+2){background:#ffe9a8; color:#141414}
 #gw .cell:nth-child(5n+3){background:#b9f3cd; color:#141414}
@@ -440,6 +447,10 @@ textarea{
         s.appendChild(p); c.appendChild(s);
       }
       c.addEventListener('click', function(){
+        if (S.called.indexOf(t) === -1){
+          c.classList.remove('wrong'); void c.offsetWidth; c.classList.add('wrong');
+          return;
+        }
         S.marks[t] = !S.marks[t]; save(); renderPlay();
       });
       g.appendChild(c);
